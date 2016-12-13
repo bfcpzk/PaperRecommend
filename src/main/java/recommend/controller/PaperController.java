@@ -58,7 +58,6 @@ public class PaperController {
         try{
             resList = paperService.recommendBasedOnKeywords(wordList, session);
             paperService.calculateSimilarity(session);
-            System.out.println(resList.size());
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -70,7 +69,6 @@ public class PaperController {
     @RequestMapping("/recommendBasedOnScoreLda.do")
     public ModelAndView recommendBasedOnScoreLda(HttpSession session, String iter, String score){
         ModelAndView mav = new ModelAndView("recommendlist");
-        System.out.println(score);
         List<Paper> resList;
         try{
             resList = paperService.recommendBasedOnScoreLda(session,  score);
@@ -102,6 +100,5 @@ public class PaperController {
         ModelAndView mav = new ModelAndView("index");
         return mav;
     }
-
 
 }

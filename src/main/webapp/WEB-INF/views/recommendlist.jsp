@@ -11,6 +11,7 @@
     <script src="js/mainpage.js"></script>
     <link type="text/css" rel="stylesheet" href="css/bootstrap.min.css" />
     <style type="text/css">
+        .warn_info{display: none;  position:fixed;  top: 10%; left: 35%;  width: 30%; height: 13%; padding: 16px;  border: 8px solid orange;  background-color: white;  z-index:1005;  overflow: auto; overflow-y:scroll;}
         .result_hide {display: none;  position:fixed;  top: 10%; left: 25%;  width: 50%; height: 60%; z-index:1005;  overflow: auto; overflow-y:scroll;}
     </style>
 </head>
@@ -71,6 +72,10 @@
                 </tbody>
             </table>
         </div>
+        <hr>
+        <div style="text-align: center; margin-bottom: 15px;">
+            copyright @ zhaokang Pan & fangyu Liu
+        </div>
     </div>
     <div id="rec_res" class="panel panel-success result_hide">
         <div class="panel-heading">
@@ -89,6 +94,10 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <div id="warn_info" class="panel-body warn_info" style='text-align:center;'>
+
     </div>
 </body>
 </html>

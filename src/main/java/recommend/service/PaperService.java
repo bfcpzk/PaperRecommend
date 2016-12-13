@@ -113,56 +113,60 @@ public class PaperService {
         Map<String, Double> finalScoreMap = new TreeMap<String, Double>();
         List<Paper> paperList = new ArrayList<Paper>();
         String res = "";
-        if(simMatrix != null){//session 结果不空
-            String[] inputScore = score.split(";");
-            for(int i = 0 ; i < inputScore.length ; i++){
-                String[] idScorePair = inputScore[i].split(",");
-                String pid = idScorePair[0];
-                double pScore = Double.parseDouble(idScorePair[1]);
-                haveRecommendIdList.add(pid);
-                if(pScore > 0.01){
-                    mayLoveIdList.add(pid);
-                }
-                Map<String, Double> tmp = simMatrix.get(pid);
-                for(Object key : tmp.keySet()){
-                    if(finalScoreMap.containsKey(key)){
-                        double tmpVal = finalScoreMap.get(key);
-                        tmpVal += tmp.get(key) * pScore;
-                        finalScoreMap.put(key.toString(), tmpVal);
-                    }else{
-                        double tmpVal = tmp.get(key) * pScore;
-                        finalScoreMap.put(key.toString(), tmpVal);
+        if(!(score == null || score.equals(""))){
+            if(simMatrix != null){//session 结果不空
+                String[] inputScore = score.split(";");
+                for(int i = 0 ; i < inputScore.length ; i++){
+                    String[] idScorePair = inputScore[i].split(",");
+                    String pid = idScorePair[0];
+                    double pScore = Double.parseDouble(idScorePair[1]);
+                    haveRecommendIdList.add(pid);
+                    if(pScore > 0.01){
+                        mayLoveIdList.add(pid);
+                    }
+                    Map<String, Double> tmp = simMatrix.get(pid);
+                    for(Object key : tmp.keySet()){
+                        if(finalScoreMap.containsKey(key)){
+                            double tmpVal = finalScoreMap.get(key);
+                            tmpVal += tmp.get(key) * pScore;
+                            finalScoreMap.put(key.toString(), tmpVal);
+                        }else{
+                            double tmpVal = tmp.get(key) * pScore;
+                            finalScoreMap.put(key.toString(), tmpVal);
+                        }
                     }
                 }
-            }
-            //这里将map.entrySet()转换成list
-            List<Map.Entry<String,Double>> slist = new ArrayList<Map.Entry<String,Double>>(finalScoreMap.entrySet());
-            //然后通过比较器来实现排序
-            Collections.sort(slist,new Comparator<Map.Entry<String,Double>>() {
-                //降序排序
-                public int compare(Map.Entry<String, Double> o1,
-                                   Map.Entry<String, Double> o2) {
-                    return o2.getValue().compareTo(o1.getValue());
-                }
-            });
-            int count = 0;
-            for(int i = 0 ; i < slist.size() ; i++){
-                Map.Entry<String, Double> entryT = slist.get(i);
-                if(!haveRecommendIdList.contains(entryT.getKey())){
-                    if(count < 4){
-                        res += "'" + entryT.getKey() + "', ";
-                        count++;
-                    }else{
-                        res += "'" + entryT.getKey() + "'";
-                        break;
+                //这里将map.entrySet()转换成list
+                List<Map.Entry<String,Double>> slist = new ArrayList<Map.Entry<String,Double>>(finalScoreMap.entrySet());
+                //然后通过比较器来实现排序
+                Collections.sort(slist,new Comparator<Map.Entry<String,Double>>() {
+                    //降序排序
+                    public int compare(Map.Entry<String, Double> o1,
+                                       Map.Entry<String, Double> o2) {
+                        return o2.getValue().compareTo(o1.getValue());
+                    }
+                });
+                int count = 0;
+                for(int i = 0 ; i < slist.size() ; i++){
+                    Map.Entry<String, Double> entryT = slist.get(i);
+                    if(!haveRecommendIdList.contains(entryT.getKey())){
+                        if(count < 4){
+                            res += "'" + entryT.getKey() + "', ";
+                            count++;
+                        }else{
+                            res += "'" + entryT.getKey() + "'";
+                            break;
+                        }
                     }
                 }
-            }
-            session.setAttribute("haveRecommendIdList", haveRecommendIdList);
-            session.setAttribute("mayLoveIdList", mayLoveIdList);
+                session.setAttribute("haveRecommendIdList", haveRecommendIdList);
+                session.setAttribute("mayLoveIdList", mayLoveIdList);
 
-            paperList = sqlDao.selectPaperByIdList(res);
-            System.out.print(paperList.size());
+                paperList = sqlDao.selectPaperByIdList(res);
+                System.out.print(paperList.size());
+            }
+        }else{
+            paperList = sqlDao.getRandom(5);
         }
         return paperList;
     }

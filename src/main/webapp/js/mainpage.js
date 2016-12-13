@@ -5,32 +5,37 @@ function submitTogether(){
 	hide.each(function(index, item){
 		res += $(item).val();
 	});
-	if(iter <= 3){
-		window.location.href="recommendBasedOnScoreLda.do?score=" + res + "&iter=" + iter;
+	if(res == ""){
+		$("#warn_info").html("<p><h4>请对至少一个文献进行打分！</h4></p>");
+		$("#warn_info").fadeIn(1000);
+		$("#warn_info").fadeOut(1000);
 	}else{
-		$.ajax({
-			type:"get",//请求类型
-			contentType:"application/json;charset=utf-8",//发往服务端的数据类型
-			url:"mayLoveList.do",
-			data:{},
-			dataType:"json",
-			success : function(msg) {
-				if(msg){//获取成功
-					$("#rec_res").show();
-					$("#t_body").empty();
-					$.each(msg, function (i, item) {
-						var $str1 = "<tr><td id='id_" + item.paper_id + "'>" + item.paper_id + "</td><td id='title_" + item.paper_id + "'>" + item.article_title + "</td>";
-						$("#t_body").append($str1);
-					});
-					var str = "<tr><td colspan='2' style='text-align: center;'><a style='text-align:center' id='back' href='javascript:void(0)' onclick='toIndex()'' class='btn btn-info'>确认</a></td></tr>";
-					$("#t_body").append(str);
-				}else{
-					alert("获取失败！");
+		if(iter <= 3){
+			window.location.href="recommendBasedOnScoreLda.do?score=" + res + "&iter=" + iter;
+		}else{
+			$.ajax({
+				type:"get",//请求类型
+				contentType:"application/json;charset=utf-8",//发往服务端的数据类型
+				url:"mayLoveList.do",
+				data:{},
+				dataType:"json",
+				success : function(msg) {
+					if(msg){//获取成功
+						$("#rec_res").show();
+						$("#t_body").empty();
+						$.each(msg, function (i, item) {
+							var $str1 = "<tr><td id='id_" + item.paper_id + "'>" + item.paper_id + "</td><td id='title_" + item.paper_id + "'>" + item.article_title + "</td>";
+							$("#t_body").append($str1);
+						});
+						var str = "<tr><td colspan='2' style='text-align: center;'><a style='text-align:center' id='back' href='javascript:void(0)' onclick='toIndex()'' class='btn btn-info'>确认</a></td></tr>";
+						$("#t_body").append(str);
+					}else{
+						alert("获取失败！");
+					}
 				}
-			}
-		});//end ajax
+			});//end ajax
+		}
 	}
-
 }
 
 function chooseRelativity(id, tag){
