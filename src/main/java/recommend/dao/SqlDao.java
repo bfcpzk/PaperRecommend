@@ -3,6 +3,7 @@ package recommend.dao;
 import recommend.model.Keywords;
 import recommend.model.Paper;
 import recommend.model.Topic;
+import recommend.model.WordCount;
 
 import java.util.List;
 
@@ -22,4 +23,8 @@ public interface SqlDao {
     public List<Paper> getSupplement(int len, String pidList);
 
     public List<Paper> getRandom(int len);
+
+    public List<WordCount> getWordCount(int threshold);
+
+    public List<Paper> getAllPaper();
 }

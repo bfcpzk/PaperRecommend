@@ -11,8 +11,9 @@
     <script src="js/mainpage.js"></script>
     <link type="text/css" rel="stylesheet" href="css/bootstrap.min.css" />
     <style type="text/css">
-        .warn_info{display: none;  position:fixed;  top: 10%; left: 35%;  width: 30%; height: 13%; padding: 16px;  border: 8px solid orange;  background-color: white;  z-index:1005;  overflow: auto; overflow-y:scroll;}
-        .result_hide {display: none;  position:fixed;  top: 10%; left: 25%;  width: 50%; height: 60%; z-index:1005;  overflow: auto; overflow-y:scroll;}
+        .warn_info{display: none;  position:fixed;  top: 10%; left: 35%;  width: 30%; height: 13%; padding: 16px; border: 8px solid orange;  background-color: white;  z-index:1005;  overflow: auto; overflow-y:scroll;}
+        .result_hide {display: none;  position:fixed;  top: 10%; left: 25%;  width: 50%; height: 60%; z-index:1005; overflow: auto; overflow-y:scroll;}
+        .feed_back {display: none; position: fixed; top: 10%; left: 25%;  width: 50%; height: 60%; z-index:1005; overflow: auto; overflow-y:scroll;}
     </style>
 </head>
 <body>
@@ -95,6 +96,69 @@
             </table>
         </div>
     </div>
+
+    <div id="feed_back" class="panel panel-info feed_back">
+        <div class="panel-heading">
+            <h4>用户反馈</h4>
+        </div>
+        <div class="panel-body">
+            <table class="table table-striped table-bordered table-hover">
+                <tbody>
+                    <tr>
+                        <td colspan="2">
+                            <h4>1.对于文献时间的年份要求？</h4>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="75%">
+                            <a style="margin-left: 2px" href="javascript:void(0)" onclick="chooseTime('不用太新', '-0.05')" class="btn btn-danger">不用太新</a>
+                            <a style="margin-left: 5px" href="javascript:void(0)" onclick="chooseTime('说不清', '0.0')" class="btn btn-info">正合适</a>
+                            <a style="margin-left: 5px" href="javascript:void(0)" onclick="chooseTime('再新一些', '0.05')" class="btn btn-warning">再新一些</a>
+                        </td>
+                        <input type="hidden" id="timeLevel" value="">
+                        <td id="timeRes">
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <h4>2.对于文献篇幅长短要求？</h4>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="75%">
+                            <a style="margin-left: 2px" href="javascript:void(0)" onclick="chooseLength('太长了', '-0.05')" class="btn btn-danger">太长了</a>
+                            <a style="margin-left: 5px" href="javascript:void(0)" onclick="chooseLength('正合适', '0.0')" class="btn btn-warning">正合适</a>
+                            <a style="margin-left: 5px" href="javascript:void(0)" onclick="chooseLength('再长一些', '0.05')" class="btn btn-info">再长一些</a>
+                        </td>
+                        <input type="hidden" id="lengthLevel" value="">
+                        <td id="lengthRes">
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <h4>3.对于文献的影响力要求？</h4>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="75%">
+                            <a style="margin-left: 5px" href="javascript:void(0)" onclick="chooseCite('正合适', '0.0')" class="btn btn-warning">正合适</a>
+                            <a style="margin-left: 5px" href="javascript:void(0)" onclick="chooseCite('有待提高', '0.05')" class="btn btn-info">有待提高</a>
+                        </td>
+                        <input type="hidden" id="citeLevel" value="">
+                        <td id="citeRes">
+
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="panel-footer" style="text-align: center">
+            <a style="text-align: center" id="sub" href="javascript:void(0)" onclick="feedBack()" class="btn btn-info">提交</a>
+        </div>
+    </div>
+    <input type="hidden" id="score_result" value="">
 
     <div id="warn_info" class="panel-body warn_info" style='text-align:center;'>
 

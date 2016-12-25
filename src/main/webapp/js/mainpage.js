@@ -11,7 +11,8 @@ function submitTogether(){
 		$("#warn_info").fadeOut(1000);
 	}else{
 		if(iter <= 3){
-			window.location.href="recommendBasedOnScoreLda.do?score=" + res + "&iter=" + iter;
+			$("#score_result").val(res);
+			$("#feed_back").show();
 		}else{
 			$.ajax({
 				type:"get",//请求类型
@@ -38,6 +39,21 @@ function submitTogether(){
 	}
 }
 
+function feedBack(){
+	var res = $("#score_result").val();
+	var iter = $("#iter").val();
+	var time = $("#timeLevel").val();
+	var length = $("#lengthLevel").val();
+	var cite = $("#citeLevel").val();
+	if(time == "" || length == "" || cite == ""){
+		$("#warn_info").html("<p><h4>请填写您的阅读偏好！</h4></p>");
+		$("#warn_info").fadeIn(1000);
+		$("#warn_info").fadeOut(1000);
+	}else{
+		window.location.href="recommendBasedOnScoreLda.do?score=" + res + "&iter=" + iter + "&time=" + time + "&length=" + length + "&cite=" + cite;
+	}
+}
+
 function chooseRelativity(id, tag){
 	if(tag == -1.0){
 		$("#res_"+id).html("<p style='color:red'>完全不相关</p><input type='hidden' id='hide_" + id +"' value='" + id + "," + -1.0 + ";'>");
@@ -51,6 +67,21 @@ function chooseRelativity(id, tag){
 		$("#res_"+id).html("<p style='color:green'>很相关</p><input type='hidden' id='hide_" + id +"' value='" + id + "," + 1.0 + ";'>");
 	}
 
+}
+
+function chooseTime(tag, level){
+	$("#timeLevel").val(level);
+	$("#timeRes").html(tag);
+}
+
+function chooseLength(tag, level){
+	$("#lengthLevel").val(level);
+	$("#lengthRes").html(tag);
+}
+
+function chooseCite(tag, level){
+	$("#citeLevel").val(level);
+	$("#citeRes").html(tag);
 }
 
 function chooseKeywords(kid, keywords){
@@ -71,7 +102,16 @@ function submitKeywords(){
 	subKey.each(function(index, item){
 		res += $(item).text() + "@";
 	});
-	window.location.href="recommendBasedOnKeywords.do?keywordlist=" + res;
+	var time = $("#timeLevel").val();
+	var length = $("#lengthLevel").val();
+	var cite = $("#citeLevel").val();
+	if(time == "" || length == "" || cite == ""){
+		$("#warn_info").html("<p><h4>请填写您的阅读偏好！</h4></p>");
+		$("#warn_info").fadeIn(1000);
+		$("#warn_info").fadeOut(1000);
+	}else{
+		window.location.href="recommendBasedOnKeywords.do?keywordlist=" + res + "&time=" + time + "&length=" + length + "&cite=" + cite;
+	}
 }
 
 function toMainPage(){

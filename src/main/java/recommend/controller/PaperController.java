@@ -6,9 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
-import recommend.model.Keywords;
-import recommend.model.Paper;
-import recommend.model.Row;
+import recommend.model.*;
 import recommend.service.PaperService;
 
 import javax.servlet.http.HttpSession;
@@ -27,31 +25,39 @@ public class PaperController {
     @RequestMapping("/toWelcomePaper.do")
     public ModelAndView toWelcomePaper(){
         ModelAndView mav = new ModelAndView("selectkeyword");
-        List<Keywords> klist = new ArrayList<Keywords>();
-        List<Row> rlist = new ArrayList<Row>();
+        //List<Keywords> kList;
+        List<WordCount> wcList = new ArrayList<WordCount>();
+        //List<Row> rList = new ArrayList<Row>();
         try {
-            klist = paperService.getKeywordsList();
-            for(int j = 0 ; j < klist.size() ; j++){
+            wcList = paperService.getWordCount();
+            /*kList = paperService.getKeywordsList();
+            for(int j = 0 ; j < kList.size() ; j++){
                 if(j % 6 == 0){
                     Row r = new Row();
-                    r.setKlist(klist.subList(j, j + 6));
-                    rlist.add(r);
+                    r.setKlist(kList.subList(j, j + 6));
+                    rList.add(r);
                     if(j == 30){
                         break;
                     }
                 }
-            }
+            }*/
         }catch (Exception e){
             e.printStackTrace();
         }
-        mav.addObject("rowSize", 6);
-        mav.addObject("klist", rlist);
+        mav.addObject("wcList", wcList);
+       /* mav.addObject("rowSize", 6);
+        mav.addObject("klist", rList);*/
         return mav;
     }
 
     @RequestMapping("/recommendBasedOnKeywords.do")
-    public ModelAndView recommendBasedOnKeywords(String keywordlist, HttpSession session){
+    public ModelAndView recommendBasedOnKeywords(String keywordlist, String time, String length, String cite, HttpSession session){
         ModelAndView mav = new ModelAndView("recommendlist");
+        Parameter p = new Parameter();
+        p.setTime(Double.parseDouble(time) + p.getTime());
+        p.setLength(Double.parseDouble(length) + p.getLength());
+        p.setCite(Double.parseDouble(cite) + p.getCite());
+        session.setAttribute("recommendParam", p);
         System.out.println(keywordlist);
         String[] wordList = keywordlist.split("@");
         List<Paper> resList = new ArrayList<Paper>();
@@ -67,11 +73,15 @@ public class PaperController {
     }
 
     @RequestMapping("/recommendBasedOnScoreLda.do")
-    public ModelAndView recommendBasedOnScoreLda(HttpSession session, String iter, String score){
+    public ModelAndView recommendBasedOnScoreLda(HttpSession session, String time, String length, String cite, String iter, String score){
         ModelAndView mav = new ModelAndView("recommendlist");
+        Parameter p = (Parameter)session.getAttribute("recommendParam");
+        p.setTime(p.getTime() + Double.parseDouble(time));
+        p.setLength(p.getLength() + Double.parseDouble(length));
+        p.setCite(p.getCite() + Double.parseDouble(cite));
         List<Paper> resList;
         try{
-            resList = paperService.recommendBasedOnScoreLda(session,  score);
+            resList = paperService.recommendBasedOnScoreLda(session,  score, p);
             mav.addObject("iter", Integer.parseInt(iter) + 1);
             mav.addObject("paperList", resList);
         }catch(Exception e){

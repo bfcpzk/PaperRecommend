@@ -3,7 +3,7 @@ package recommend.model;
 /**
  * Created by zhaokangpan on 2016/12/8.
  */
-public class Paper {
+public class Paper{
 
     private String item_ut;
     private String article_title;
@@ -12,16 +12,16 @@ public class Paper {
     private String abs;
     private String beginning_page;
     private String ending_page;
-    private String page_count;
+    private int page_count;
     private String item_t9;
-    private String cited_count;
+    private int cited_count;
     private String paper_id;
     private String item_ui;
     private String full_source_title;
     private String volume;
     private String issue;
     private String publication_type;
-    private String publication_year;
+    private int publication_year;
     private String publication_date;
 
     public String getPublication_date() {
@@ -32,13 +32,6 @@ public class Paper {
         this.publication_date = publication_date;
     }
 
-    public String getPublication_year() {
-        return publication_year;
-    }
-
-    public void setPublication_year(String publication_year) {
-        this.publication_year = publication_year;
-    }
 
     public String getPublication_type() {
         return publication_type;
@@ -88,28 +81,12 @@ public class Paper {
         this.paper_id = paper_id;
     }
 
-    public String getCited_count() {
-        return cited_count;
-    }
-
-    public void setCited_count(String cited_count) {
-        this.cited_count = cited_count;
-    }
-
     public String getItem_t9() {
         return item_t9;
     }
 
     public void setItem_t9(String item_t9) {
         this.item_t9 = item_t9;
-    }
-
-    public String getPage_count() {
-        return page_count;
-    }
-
-    public void setPage_count(String page_count) {
-        this.page_count = page_count;
     }
 
     public String getEnding_page() {
@@ -166,5 +143,29 @@ public class Paper {
 
     public void setItem_ut(String item_ut) {
         this.item_ut = item_ut;
+    }
+
+    public int getPage_count() {
+        return page_count;
+    }
+
+    public void setPage_count(int page_count) {
+        this.page_count = page_count;
+    }
+
+    public int getCited_count() {
+        return cited_count;
+    }
+
+    public void setCited_count(int cited_count) {
+        this.cited_count = cited_count;
+    }
+
+    public int getPublication_year() {
+        return publication_year;
+    }
+
+    public void setPublication_year(int publication_year) {
+        this.publication_year = publication_year;
     }
 }

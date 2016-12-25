@@ -6,6 +6,7 @@ import recommend.dao.SqlDao;
 import recommend.model.Keywords;
 import recommend.model.Paper;
 import recommend.model.Topic;
+import recommend.model.WordCount;
 
 import java.util.List;
 
@@ -90,5 +91,28 @@ public class SqlDaoImp implements SqlDao {
         }
         return result;
     }
+
+    public List<WordCount> getWordCount(int threshold){
+        List<WordCount> result = null;
+        String sql = "select kid, keywords, count(*) wordcount from paper_keywords group by keywords order by wordcount desc limit " + threshold;
+        try{
+            result = getJdbcTemplate().query(sql, new BeanPropertyRowMapper(WordCount.class));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public List<Paper> getAllPaper(){
+        List<Paper> result=null;
+        String sql = "SELECT * FROM paper_info";
+        try{
+            result = getJdbcTemplate().query(sql, new BeanPropertyRowMapper(Paper.class));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return result;
+    }
+
 
 }

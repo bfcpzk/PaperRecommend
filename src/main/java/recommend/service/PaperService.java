@@ -3,9 +3,7 @@ package recommend.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import recommend.dao.SqlDao;
-import recommend.model.Keywords;
-import recommend.model.Paper;
-import recommend.model.Topic;
+import recommend.model.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.*;
@@ -45,32 +43,42 @@ public class PaperService {
         return klist;
     }
 
-    public List<Paper> recommendBasedOnKeywords(String[] wordList, HttpSession session){
-        List<Paper> paperList = new ArrayList<Paper>();
-        List<Keywords> klist = new ArrayList<Keywords>();
-        String wlist = "";
-        String plist = "";
-        for(int i = 0 ; i < wordList.length - 1 ; i++){
-            wlist += "'" + wordList[i] + "', ";
+    public List<WordCount> getWordCount(){
+        List<WordCount> wcList = new ArrayList<WordCount>();
+        try{
+            wcList = sqlDao.getWordCount(30);
+        }catch(Exception e){
+            e.printStackTrace();
         }
-        wlist += "'" + wordList[wordList.length - 1] + "'";
-        if(!wlist.equals("''")){
-            klist = sqlDao.selectArticleIdBasedOnKeywords(wlist);
+        return wcList;
+    }
+
+    public List<Paper> recommendBasedOnKeywords(String[] wordList, HttpSession session){
+        List<Paper> paperList;
+        List<Keywords> kList;
+        String wList = "";
+        String pList = "";
+        for(int i = 0 ; i < wordList.length - 1 ; i++){
+            wList += "'" + wordList[i] + "', ";
+        }
+        wList += "'" + wordList[wordList.length - 1] + "'";
+        if(!wList.equals("''")){
+            kList = sqlDao.selectArticleIdBasedOnKeywords(wList);
             //去重
-            klist = removeDuplicateByItem_ut(klist);
-            for(int i = 0 ; i < klist.size() ; i++){
-                System.out.println(klist.get(i).getItem_ut() + "\t" + klist.get(i).getKeywords());
+            kList = removeDuplicateByItem_ut(kList);
+            for(int i = 0 ; i < kList.size() ; i++){
+                System.out.println(kList.get(i).getItem_ut() + "\t" + kList.get(i).getKeywords());
             }
 
-            for(int i = 0 ; i < Math.min(5, klist.size()) - 1 ; i++){
-                plist += "'" + klist.get(i).getItem_ut() + "', ";
+            for(int i = 0 ; i < Math.min(5, kList.size()) - 1 ; i++){
+                pList += "'" + kList.get(i).getItem_ut() + "', ";
             }
-            plist += "'" + klist.get(Math.min(5, klist.size()) - 1) + "'";
-            paperList = sqlDao.selectPaperByIdList(plist);
+            pList += "'" + kList.get(Math.min(5, kList.size()) - 1) + "'";
+            paperList = sqlDao.selectPaperByIdList(pList);
 
             //数据不足进行补充
             if(paperList.size() < 5){
-                List<Paper> supplyment = sqlDao.getSupplement(5 - paperList.size(), plist);
+                List<Paper> supplyment = sqlDao.getSupplement(5 - paperList.size(), pList);
                 paperList.addAll(supplyment);
             }
         }else{
@@ -84,14 +92,14 @@ public class PaperService {
     }
 
     public List<Keywords> getKeywordsList(){
-        List<Keywords> klist = new ArrayList<Keywords>();
+        List<Keywords> kList = new ArrayList<Keywords>();
         try{
-            klist = sqlDao.getKeywordsList();
-            klist = removeDuplicate(klist);
+            kList = sqlDao.getKeywordsList();
+            kList = removeDuplicate(kList);
         }catch (Exception e){
             e.printStackTrace();
         }
-        return klist;
+        return kList;
     }
 
     public static double cosSimilarity(Vector<Double> v1, Vector<Double> v2){
@@ -106,7 +114,67 @@ public class PaperService {
         return res/(Math.sqrt(v1square * v2square));
     }
 
-    public List<Paper> recommendBasedOnScoreLda(HttpSession session, String score){
+    public static List<Paper> calComplexIndex(List<Paper> paperList, Parameter p){
+        Map<String, Double> complexRecommendMap = new TreeMap<String, Double>();
+        int timeMax = -1, lengthMax = -1, citeMax = -1;
+        int timeMin = 99999,lengthMin = 99999,citeMin = 99999;
+        for(int i = 0 ; i < paperList.size() ; i++){
+            if(timeMax < paperList.get(i).getPublication_year()){
+                timeMax = paperList.get(i).getPublication_year();
+            }
+            if(timeMin > paperList.get(i).getPublication_year()){
+                timeMin = paperList.get(i).getPublication_year();
+            }
+            if(lengthMax < paperList.get(i).getPage_count()){
+                lengthMax = paperList.get(i).getPage_count();
+            }
+            if(lengthMin > paperList.get(i).getPage_count()){
+                lengthMin = paperList.get(i).getPage_count();
+            }
+            if(citeMax < paperList.get(i).getCited_count()){
+                citeMax = paperList.get(i).getCited_count();
+            }
+            if(citeMin > paperList.get(i).getCited_count()){
+                citeMin = paperList.get(i).getCited_count();
+            }
+        }
+        for(int i = 0 ; i < paperList.size() ; i++){
+            Paper pTmp = paperList.get(i);
+            double perScore = 0.0;
+            double timeTmp = (pTmp.getPublication_year() - timeMin)/(timeMax - timeMin);
+            double citeTmp = (pTmp.getCited_count() - citeMin)/(citeMax - citeMin);
+            double lengthTmp = (pTmp.getPage_count() - lengthMin)/(lengthMax - lengthMin);
+            perScore = timeTmp * p.getTime() + citeTmp * p.getCite() + lengthTmp * p.getLength();
+            complexRecommendMap.put(pTmp.getItem_ut(), perScore);
+        }
+        //这里将map.entrySet()转换成list
+        List<Map.Entry<String,Double>> sList = new ArrayList<Map.Entry<String,Double>>(complexRecommendMap.entrySet());
+        //然后通过比较器来实现排序
+        Collections.sort(sList,new Comparator<Map.Entry<String,Double>>() {
+            //降序排序
+            public int compare(Map.Entry<String, Double> o1,
+                               Map.Entry<String, Double> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+        Set<String> idSet = new HashSet<String>();
+        for(int i = 0 ; i < sList.size(); i++){
+            Map.Entry<String, Double> entryT = sList.get(i);
+            idSet.add(entryT.getKey());
+            if(idSet.size() >= 5){
+                break;
+            }
+        }
+        for(int i = 0 ; i < paperList.size() ; i++){
+            if(!idSet.contains(paperList.get(i).getItem_ut())){
+                paperList.remove(i);
+                i--;
+            }
+        }
+        return paperList;
+    }
+
+    public List<Paper> recommendBasedOnScoreLda(HttpSession session, String score, Parameter p){
         Map<String, Map<String, Double>> simMatrix = (Map<String, Map<String, Double>>)session.getAttribute("simMatrix");
         Set<String> haveRecommendIdList = (HashSet<String>)session.getAttribute("haveRecommendIdList");
         Set<String> mayLoveIdList = (HashSet<String>)session.getAttribute("mayLoveIdList");
@@ -121,6 +189,7 @@ public class PaperService {
                     String pid = idScorePair[0];
                     double pScore = Double.parseDouble(idScorePair[1]);
                     haveRecommendIdList.add(pid);
+                    p.setSimilarity(p.getSimilarity() + pScore * 0.05);
                     if(pScore > 0.01){
                         mayLoveIdList.add(pid);
                     }
@@ -137,33 +206,40 @@ public class PaperService {
                     }
                 }
                 //这里将map.entrySet()转换成list
-                List<Map.Entry<String,Double>> slist = new ArrayList<Map.Entry<String,Double>>(finalScoreMap.entrySet());
+                List<Map.Entry<String,Double>> sList = new ArrayList<Map.Entry<String,Double>>(finalScoreMap.entrySet());
                 //然后通过比较器来实现排序
-                Collections.sort(slist,new Comparator<Map.Entry<String,Double>>() {
+                Collections.sort(sList,new Comparator<Map.Entry<String,Double>>() {
                     //降序排序
                     public int compare(Map.Entry<String, Double> o1,
                                        Map.Entry<String, Double> o2) {
                         return o2.getValue().compareTo(o1.getValue());
                     }
                 });
-                int count = 0;
-                for(int i = 0 ; i < slist.size() ; i++){
-                    Map.Entry<String, Double> entryT = slist.get(i);
+                System.out.println("sim : " + p.getSimilarity());
+                System.out.println("sList : " + sList.size());
+                Set<String> idSet = new HashSet<String>();
+                for(int i = 0 ; i < sList.size() * p.getSimilarity() ; i++){
+                    Map.Entry<String, Double> entryT = sList.get(i);
                     if(!haveRecommendIdList.contains(entryT.getKey())){
-                        if(count < 4){
-                            res += "'" + entryT.getKey() + "', ";
-                            count++;
-                        }else{
-                            res += "'" + entryT.getKey() + "'";
-                            break;
-                        }
+                        idSet.add(entryT.getKey());
                     }
                 }
+                paperList = sqlDao.getAllPaper();
+                for(int i = 0 ; i < paperList.size() ; i++){
+                    if(!idSet.contains(paperList.get(i).getItem_ut())){
+                        paperList.remove(i);
+                        i--;
+                    }
+                }
+                System.out.print(paperList.size());
+
+                //根据多指标推荐结果重新获取数据
+                paperList = calComplexIndex(paperList, p);
+                p.setSimilarity(0.25);
+
+                session.setAttribute("recommendParam", p);
                 session.setAttribute("haveRecommendIdList", haveRecommendIdList);
                 session.setAttribute("mayLoveIdList", mayLoveIdList);
-
-                paperList = sqlDao.selectPaperByIdList(res);
-                System.out.print(paperList.size());
             }
         }else{
             paperList = sqlDao.getRandom(5);
