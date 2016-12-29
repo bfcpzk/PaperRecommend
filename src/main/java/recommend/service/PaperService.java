@@ -53,7 +53,7 @@ public class PaperService {
         return wcList;
     }
 
-    public List<Paper> recommendBasedOnKeywords(String[] wordList, HttpSession session){
+    public List<Paper> recommendBasedOnKeywords(String[] wordList, HttpSession session, String secMacAddr){
         List<Paper> paperList;
         List<Keywords> kList;
         String wList = "";
@@ -85,8 +85,8 @@ public class PaperService {
             paperList = sqlDao.getRandom(5);
         }
 
-        session.setAttribute("haveRecommendIdList", new HashSet<String>());
-        session.setAttribute("mayLoveIdList", new HashSet<String>());
+        session.setAttribute("haveRecommendIdList_" + secMacAddr, new HashSet<String>());
+        session.setAttribute("mayLoveIdList_" + secMacAddr, new HashSet<String>());
 
         return paperList;
     }
@@ -174,10 +174,10 @@ public class PaperService {
         return paperList;
     }
 
-    public List<Paper> recommendBasedOnScoreLda(HttpSession session, String score, Parameter p){
-        Map<String, Map<String, Double>> simMatrix = (Map<String, Map<String, Double>>)session.getAttribute("simMatrix");
-        Set<String> haveRecommendIdList = (HashSet<String>)session.getAttribute("haveRecommendIdList");
-        Set<String> mayLoveIdList = (HashSet<String>)session.getAttribute("mayLoveIdList");
+    public List<Paper> recommendBasedOnScoreLda(HttpSession session, String score, Parameter p, String secMacAddr){
+        Map<String, Map<String, Double>> simMatrix = (Map<String, Map<String, Double>>)session.getAttribute("simMatrix_" + secMacAddr);
+        Set<String> haveRecommendIdList = (HashSet<String>)session.getAttribute("haveRecommendIdList_" + secMacAddr);
+        Set<String> mayLoveIdList = (HashSet<String>)session.getAttribute("mayLoveIdList_" + secMacAddr);
         Map<String, Double> finalScoreMap = new TreeMap<String, Double>();
         List<Paper> paperList = new ArrayList<Paper>();
         String res = "";
@@ -237,9 +237,9 @@ public class PaperService {
                 paperList = calComplexIndex(paperList, p);
                 p.setSimilarity(0.25);
 
-                session.setAttribute("recommendParam", p);
-                session.setAttribute("haveRecommendIdList", haveRecommendIdList);
-                session.setAttribute("mayLoveIdList", mayLoveIdList);
+                session.setAttribute("recommendParam_" + secMacAddr, p);
+                session.setAttribute("haveRecommendIdList_" + secMacAddr, haveRecommendIdList);
+                session.setAttribute("mayLoveIdList_" + secMacAddr, mayLoveIdList);
             }
         }else{
             paperList = sqlDao.getRandom(5);
@@ -247,7 +247,7 @@ public class PaperService {
         return paperList;
     }
 
-    public void calculateSimilarity(HttpSession session){
+    public void calculateSimilarity(HttpSession session, String secMacAddr){
         //计算全部文章的相似度
         Map<String, Map<String, Double>> simMatric;
         List<Topic> tList;
@@ -270,15 +270,15 @@ public class PaperService {
                 }
                 simMatric.put(tList.get(i).getPaper_id(), tmp);
             }
-            session.setAttribute("simMatrix", simMatric);
+            session.setAttribute("simMatrix_" + secMacAddr, simMatric);
         }catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    public List<Paper> getMayLove(HttpSession session){
+    public List<Paper> getMayLove(HttpSession session, String secMacAddr){
         List<Paper> paperList;
-        Set<String> mayLoveIdList = (HashSet<String>)session.getAttribute("mayLoveIdList");
+        Set<String> mayLoveIdList = (HashSet<String>)session.getAttribute("mayLoveIdList_" + secMacAddr);
         String res = "";
         int count = 0;
         for(String str : mayLoveIdList){

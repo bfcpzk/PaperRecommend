@@ -72,7 +72,7 @@ public class SqlDaoImp implements SqlDao {
 
     public List<Paper> getSupplement(int len, String pidList){
         List<Paper> result=null;
-        String sql = "SELECT * FROM paper_info where item_ut not in (" + pidList + ") ORDER BY RAND() LIMIT " + len;
+        String sql = "select * from paper_info where item_ut not in (" + pidList + ") order by RAND() LIMIT " + len;
         try{
             result = getJdbcTemplate().query(sql, new BeanPropertyRowMapper(Paper.class));
         }catch (Exception e){
@@ -83,7 +83,7 @@ public class SqlDaoImp implements SqlDao {
 
     public List<Paper> getRandom(int len){
         List<Paper> result=null;
-        String sql = "SELECT * FROM paper_info ORDER BY RAND() LIMIT " + len;
+        String sql = "select * from paper_info order by RAND() LIMIT " + len;
         try{
             result = getJdbcTemplate().query(sql, new BeanPropertyRowMapper(Paper.class));
         }catch (Exception e){
@@ -105,7 +105,7 @@ public class SqlDaoImp implements SqlDao {
 
     public List<Paper> getAllPaper(){
         List<Paper> result=null;
-        String sql = "SELECT * FROM paper_info";
+        String sql = "select * from paper_info";
         try{
             result = getJdbcTemplate().query(sql, new BeanPropertyRowMapper(Paper.class));
         }catch (Exception e){
